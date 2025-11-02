@@ -1,0 +1,100 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [books, setBooks] = useState([]);
+  const [error, setError] = useState('');
+  const [newBook, setNewBook] = useState({
+    title: '',
+    author: '',
+    price: ''
+  });
+
+  const baseUrl = 'http://localhost:8090/books';
+
+  const getAllBooks = async () => {
+    try {
+      const response = await axios.get(${baseUrl}/getAllBooks);
+      setBooks(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error fetching books.');
+    }
+  };
+
+  const addBook = async () => {
+    try {
+      await axios.post(${baseUrl}/addBook, newBook);
+      setNewBook({ title: '', author: '', price: '' });
+      getAllBooks();
+      setError('');
+    } catch (err) {
+      setError('Error adding book.');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewBook((prevBook) => ({
+      ...prevBook,
+      [name]: value
+    }));
+  };
+
+  useEffect(() => {
+    getAllBooks();
+  }, []);
+
+  return (
+    <div className="container">
+      <h1>Book Details</h1>
+      <button onClick={getAllBooks}>Refresh Book List</button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      
+      <div>
+        <h2>Add a New Book:</h2>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            name="title"
+            value={newBook.title}
+            onChange={handleInputChange}
+            placeholder="Title"
+            required
+          />
+          <input
+            type="text"
+            name="author"
+            value={newBook.author}
+            onChange={handleInputChange}
+            placeholder="Author"
+            required
+          />
+          <input
+            type="number"
+            name="price"
+            value={newBook.price}
+            onChange={handleInputChange}
+            placeholder="Price"
+            required
+          />
+          <button onClick={addBook}>Add Book</button>
+        </form>
+      </div>
+
+      <div>
+        <h2>Books:</h2>
+        <ul>
+          {books.map((book) => (
+            <li key={book.id}>
+              <strong>{book.title}</strong> by {book.author} - ₹{book.price}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export default App;
